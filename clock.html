@@ -1,0 +1,104 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<style type="text/css">
+	body{
+		background: #ddd;
+	}
+	#canvas{
+		position: absolute;
+		left: 0;
+		top: 0;
+		margin:20px;
+		background: #fff;
+		border: thin solid #aaa;
+	}
+</style>
+</head>
+<body>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <script type="text/javascript">
+    	var canvas = document.getElementById('canvas'),
+    		context = canvas.getContext('2d'),
+    		FONT_HEIGHT = 27,
+    		MARGIN = 35,
+    		HAND_TRUNCATION = canvas.width/25,
+    		HOUR_HAND_TRUNCATION = canvas.width/10,
+    		NUMBERAL_SPACING = 20,
+    		RADIUS = canvas.width/2 - MARGIN,
+    		HAND_RADIUS = RADIUS + NUMBERAL_SPACING;
+
+    	//-------------Function--------
+    	function drawCircle(){
+    		context.beginPath();
+    		context.arc(canvas.width/2,canvas.height/2,RADIUS,0,Math.PI*2,true);
+    		context.stroke();
+    	}
+
+    	function drawNumerals(){
+    		var numerals = [1,2,3,4,5,6,7,8,9,10,11,12],
+    			angle = 0,
+    			numeralWidth = 0;
+    		numerals.forEach(function(numeral){
+    			angle = Math.PI/6 * (numeral-3);
+    			numeralWidth = context.measureText(numeral).width;//测量数字的width
+    			//找规律尽量找特殊点 起点是从3点开始的
+    			context.fillText(numeral,
+    				canvas.width/2 + Math.cos(angle)*(HAND_RADIUS) - numeralWidth/2,
+    				canvas.height/2 + Math.sin(angle)*(HAND_RADIUS) + FONT_HEIGHT/3);
+    		});
+    	}
+
+    	function drawCenter(){
+    		context.beginPath();
+    		context.arc(canvas.width/2,canvas.height/2,5,0,Math.PI*2,true);
+    		context.fill();
+    	}
+
+        /*
+            var angle = (Math.PI*2)*(loc/60) - Math.PI/2
+            注解：计算弧度
+
+            drawHand(hour*5 + (date.getMinutes()/60)*5, true);
+            注解：1个小时是 1/12 * 360 ===> 1个小时的弧度
+
+            drawHand(date.getMinutes(), false);
+            注解：1分钟 是  1/60 * 360 ====> 1分钟弧度      
+         */
+    	function drawHand(loc, isHour){
+    		var angle = (Math.PI*2)*(loc/60) - Math.PI/2, //-90deg
+    			handRadius = isHour ? RADIUS - HAND_TRUNCATION - HOUR_HAND_TRUNCATION : RADIUS - HAND_TRUNCATION;
+            context.moveTo(canvas.width/2, canvas.height/2); 
+            context.lineTo(canvas.width/2  + Math.cos(angle)*handRadius, canvas.height/2 + Math.sin(angle)*handRadius);
+            context.stroke();              
+    	}
+
+    	function drawHands(){
+    		var date = new Date,
+    			hour = date.getHours();
+    		hour = hour > 12 ? hour - 12 : hour;
+    		drawHand(hour*5 + (date.getMinutes()/60)*5, true);
+		    drawHand(date.getMinutes(), false);
+		    drawHand(date.getSeconds(), false);
+    	}
+
+    	function drawClock() {
+		   context.clearRect(0,0,canvas.width,canvas.height);
+		   drawCircle();
+		   drawCenter();
+		   drawHands();
+		   drawNumerals();
+		}
+// Initialization.....................
+		context.font = FONT_HEIGHT + 'px Arial';
+		loop = setInterval(drawClock, 1000);
+    </script>
+</body>
+</html>
